@@ -1,27 +1,30 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 from typing import Protocol
-from enum import Enum
+
 
 @dataclass(frozen=True)
 class ChimDataClass(Protocol):
     pass
 
+
 class FoodType(Enum):
-    FISH=1
-    CHIKIN=2
+    FISH = auto()
+    CHIKIN = auto()
+
 
 @dataclass(frozen=True)
-class Kuu(ChimDataClass):
-    name:str
-    id:str
+class Kuu:
+    name: str
+    id: str
 
-    def jump(self,distance:int)->bool:
-        if distance<3:
+    def jump(self, distance: int) -> bool:
+        if distance < 3:
             return True
         else:
             return False
 
-    def eat(self,food:FoodType):
+    def eat(self, food: FoodType) -> None:
         match food:
             case FoodType.FISH:
                 print("I like it")
@@ -31,11 +34,43 @@ class Kuu(ChimDataClass):
                 print("error")
 
 
-def main():
-    kuu=Kuu(name="str",id="ddd")
-    kuu.id="aaa"
+@dataclass(frozen=True)
+class Chim:
+    name: str
+    id: str
+
+    def eat(self, food: FoodType) -> None:
+        match food:
+            case FoodType.FISH:
+                print("chim yammy")
+            case FoodType.CHIKIN:
+                print("no")
+
+    def jump(self, distance: int) -> bool:
+        return False
+
+
+class Cat(Protocol):
+    def jump(self, distance: int) -> bool:
+        ...
+
+    def eat(self, food: FoodType) -> None:
+        ...
+
+
+def morning(cat: Cat) -> None:
+    cat.eat(FoodType.FISH)
+
+    cat.jump(3)
+
+
+def main() -> None:
+    kuu = Kuu(name="str", id="ddd")
     print(kuu)
+    kuu.eat(food=FoodType.CHIKIN)
+    chim = Chim(name="chim", id="1")
+    morning(chim)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
