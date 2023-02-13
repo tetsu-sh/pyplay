@@ -56,7 +56,12 @@ class Cat(Protocol):
 
     def eat(self, food: FoodType) -> None:
         ...
+from typing import TypeVar
 
+T=TypeVar("T",bound=int)
+
+def calc(a:T,b:T)->T:
+    return a+b
 
 def morning(cat: Cat) -> None:
     cat.eat(FoodType.FISH)
