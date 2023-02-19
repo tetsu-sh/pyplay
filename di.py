@@ -1,13 +1,18 @@
-from injector import Injector
+from injector import Injector, inject
+
+from database import SessionLocal
+from repository import UserRepository
 
 
-class Dependency:
-    def __init__(self) -> None:
-        self.injector = Injector(self.__class__.config)
+# Dependency
+@inject
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-    @classmethod
-    def config(cls, binder):
-        pass
 
-    def resolve(self, cls):
-        return self.injector.get(cls)
+def config():
+    injector = Injector()

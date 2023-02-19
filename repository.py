@@ -4,7 +4,6 @@ import uuid
 from dataclasses import dataclass
 from typing import final
 
-import bcrypt
 from injector import inject
 from pydantic import BaseModel, validator
 from sqlalchemy import text
@@ -32,11 +31,6 @@ class User(BaseModel):
             raise EmailInvalidExecption(message="invalid email pattern. use")
         return v
 
-    @validator("hash_password", check_fields=False)
-    def hash_password(cls, v: str) -> str:
-        hashed_password = bcrypt.hashpw(password=v, salt=bcrypt.gensalt(10))
-        return hashed_password
-
 
 class UserRepository:
     def __init__(self, db_session: Session) -> None:
@@ -46,7 +40,77 @@ class UserRepository:
         self.db_session.execute(
             text(
                 f"""
-        INSERT INTO users(id,name,hash_password,email) VALUES(:user.id,:user.name,user.hash_password,user.email);
+        INSERT INTO users(id,name,hash_password,email) VALUES(:id,:name,:hash_password,:email)
         """
-            )
+            ),
+            {
+                "id": user.id.hex,
+                "name": user.name,
+                "hash_password": user.hash_password,
+                "email": user.email,
+            },
         )
+
+
+class Follow(BaseModel):
+    from_user_id: uuid.UUID
+    to_user_id: uuid.UUID
+
+
+class FollowRepository:
+    def __init__(self, db_session: Session) -> None:
+        self.db_session = db_session
+
+    def save(self, follow: Follow) -> None:
+        self.db_session.execute(
+            text(
+                f"""
+        INSERT INTO users(from_user_id,to_user_id) VALUES(:from_user_id,:to_user_id)
+        """
+            ),
+            {
+                "from_user_id": follow.from_user_id,
+                "to_user_id": follow.to_user_id,
+            },
+        )
+
+
+class Message(BaseModel):
+    id: uuid.UUID
+    thread_id: uuid.UUID
+    user_id: uuid.UUID
+    content: str
+
+
+class Thread(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+
+
+class ThreadRepository:
+    def __init__(self, db_session: Session) -> None:
+        self.db_session = db_session
+
+    def save_first_message(self, message: Message) -> None:
+        self.db_session.execute(
+            text(
+                f"""
+        INSERT INTO users(from_user_id,to_user_id) VALUES(:from_user_id,:to_user_id)
+        """
+            ),
+            {
+                "from_user_id": follow.from_user_id,
+                "to_user_id": follow.to_user_id,
+            },
+        )
+    def save_message(self,thread:Thread,message:Message):
+       self.db_session.execute(
+            text(
+                f"""
+        INSERT INTO users(from_user_id,to_user_id) VALUES(:from_user_id,:to_user_id)
+        """
+            ),
+            {
+                "from_user_id": follow.from_user_id,
+                "to_user_id": follow.to_user_id,
+            }, 

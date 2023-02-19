@@ -1,21 +1,19 @@
-import uuid
 from typing import Optional
 
 from fastapi import Depends, FastAPI
-from injector import Inject, Injector
 from sqlalchemy.orm import Session
 
 import models
 from database import SessionLocal, engine
 from interface import CreateUser, TimeLineView
-from repository import User, UserRepository
+from repository import UserRepository
 from usecase import UserUseCase
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Dependency
+
 def get_db():
     db = SessionLocal()
     try:
@@ -24,15 +22,12 @@ def get_db():
         db.close()
 
 
-injector = Injector([get_db(), UserRepository()])
-
-
 @app.get("/")
 async def healthcheck():
     return {"message": "Hello World"}
 
 
-@app.get("/timeline/", response_model=TimeLineView)
+@app.get("/timeline/")
 async def get_timeline(user_id: str):
     return
 
@@ -48,8 +43,9 @@ async def follow(to_user_id: str, user_id: str) -> None:
 
 
 @app.post("/user")
-async def create_user(req: CreateUser) -> None:
-    UserUseCase().create_user(req)
+async def create_user(req: CreateUser, session: Session = Depends(get_db)) -> None:
+    repo = UserRepository(session)
+    UserUseCase(session=session, user_repository=repo).create_user(req)
     return
 
 

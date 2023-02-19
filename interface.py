@@ -17,7 +17,7 @@ class ThreadView(BaseModel):
 
 class MessageView(BaseModel):
     content: str
-    favorites: list["FavoriteView"]
+    favorites: 
 
 
 class FavoriteView(BaseModel):
